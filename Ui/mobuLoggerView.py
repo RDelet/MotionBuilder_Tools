@@ -9,12 +9,11 @@ from PySide2.QtCore import Qt
 from PySide2.QtGui import QCloseEvent
 from PySide2.QtWidgets import QMainWindow, QTextEdit, QVBoxLayout, QWidget
 
-from MotionBuilder_Tools.Core.logger import mb_logger, log_formatter
-from MotionBuilder_Tools.Core.stdOutputWriter import STDOutputWriter
-from MotionBuilder_Tools.Ui import qtUtils
-from MotionBuilder_Tools.Ui.loggerHighLigther import LoggerHighLigther
-
-from MotionBuilder_Tools.Core.signal import Signal
+from ..Core.logger import mb_logger, log_formatter
+from ..Core.stdOutputWriter import STDOutputWriter
+from ..Core.signal import Signal
+from ..Ui import qtUtils
+from ..Ui.loggerHighLigther import LoggerHighLigther
 
 
 class RequestsHandler(logging.Handler):

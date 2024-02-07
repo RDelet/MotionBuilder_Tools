@@ -1,6 +1,6 @@
 import os
 
-from MotionBuilder_Tools.Core.signal import Signal
+from ..Core.signal import Signal
 
 
 class STDOutputWriter:

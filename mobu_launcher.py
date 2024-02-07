@@ -33,7 +33,7 @@ def main(*args, **kwargs):
     command.append(os.path.normpath(os.path.join(module_dir, "usersetup.py")))
 
     logger.info("Launch subprocess.")
-    proc = subprocess.Popen(command, shell=True, universal_newlines=True, env=None)
+    proc = subprocess.Popen(command, shell=True)
     stdout, stderr = proc.communicate()
     exit_status = proc.returncode
 

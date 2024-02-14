@@ -29,6 +29,13 @@ class RequestsHandler(logging.Handler):
 
 class MobuLoggerView(QMainWindow):
 
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
     def __init__(self, parent: Optional[QWidget] = None):
         super().__init__(qtUtils.get_main_window() if not parent else parent)
 
@@ -41,6 +48,10 @@ class MobuLoggerView(QMainWindow):
         request_handler.newLog.register(self.append)
 
         self.show()
+    
+    @classmethod
+    def instance(cls):
+        return cls._instance
 
     def _populate(self):
         self.setWindowTitle("MotionBuilder Logger View")
@@ -80,4 +91,5 @@ class MobuLoggerView(QMainWindow):
         self.bloc_text.setPlainText(f"{current_text}{txt}" if current_text else txt)
 
     def closeEvent(self, event: QCloseEvent):
+        self.hide()
         event.ignore()

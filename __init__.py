@@ -37,3 +37,4 @@ except Exception as e:
     mb_logger.debug(traceback.format_exc()) 
 
 mb_logger.info("Start up message !")
+raise RuntimeError("Hodor !")

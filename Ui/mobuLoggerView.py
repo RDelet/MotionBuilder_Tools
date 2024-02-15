@@ -1,30 +1,14 @@
-from datetime import datetime
-import os
-import logging
 import sys
-import tempfile
 from typing import Optional
 
 from PySide2.QtCore import Qt
 from PySide2.QtGui import QCloseEvent
 from PySide2.QtWidgets import QMainWindow, QTextEdit, QVBoxLayout, QWidget
 
-from ..Core.logger import mb_logger, log_formatter
 from ..Core.stdOutputWriter import STDOutputWriter
-from ..Core.signal import Signal
+from ..Core.logger import mb_logger, log_file_path
 from ..Ui import qtUtils
 from ..Ui.loggerHighLigther import LoggerHighLigther
-
-
-class RequestsHandler(logging.Handler):
-
-    newLog: Signal = Signal()
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def emit(self, record):
-        self.newLog.emit(f"{log_formatter.format(record)}\n")
 
 
 class MobuLoggerView(QMainWindow):
@@ -39,14 +23,14 @@ class MobuLoggerView(QMainWindow):
     def __init__(self, parent: Optional[QWidget] = None):
         super().__init__(qtUtils.get_main_window() if not parent else parent)
 
+        self._std_out_writer = STDOutputWriter(sys.stdout, log_file_path)
+        self._std_out_writer.textAdded.register(self.append)
+        self._std_err_writer = STDOutputWriter(sys.stderr, log_file_path)
+        self._std_err_writer.textAdded.register(self.append)
+        mb_logger.new_log.register(self.append)
+
         self._populate()
-        self._writer = self._create_writer()
-        self._writer.textAdded.register(self.append)
-
-        request_handler = RequestsHandler()
-        mb_logger.addHandler(request_handler)
-        request_handler.newLog.register(self.append)
-
+        self._redirect_std()
         self.show()
     
     @classmethod
@@ -71,20 +55,10 @@ class MobuLoggerView(QMainWindow):
 
         self.layout.addWidget(self.bloc_text)
         self.high_ligther = LoggerHighLigther(self.bloc_text.document())
-
-    def _create_writer(self) -> STDOutputWriter:
-        writer = STDOutputWriter(self._get_log_file_path())
-        sys.stdout = writer
-        sys.stderr = writer
-
-        return writer
-
-    @staticmethod
-    def _get_log_file_path() -> str:
-        tmp_dir = tempfile.gettempdir()
-        date = datetime.now().strftime("%d_%m_%Y_%Hh_%Mmin")
-
-        return os.path.join(tmp_dir, "QD_MOBU_LOG", f"MobuLogs_{date}.rde")
+    
+    def _redirect_std(self):
+        sys.stdout = self._std_out_writer
+        sys.stderr = self._std_err_writer
 
     def append(self, txt: str):
         current_text = self.bloc_text.toPlainText()

@@ -22,12 +22,9 @@ class ReferenceEditorUI(QMainWindow):
 
     _singleton = None
 
-    def __new__(cls, *args, **kwargs):
-        if not cls._singleton:
-            return super().__new__(cls, *args, **kwargs)
-        return cls._singleton
 
     def __init__(self, parent: Optional[QWidget] = None):
+        self._check_singleton()
         super().__init__(qtUtils.get_main_window() if not parent else parent)
         self.setWindowTitle("Reference Editor")
         self._add_toolbar()
@@ -35,9 +32,10 @@ class ReferenceEditorUI(QMainWindow):
         self._update_content()
 
     def _check_singleton(self):
-        if self.__singleton is not None:
-            self.__singleton.close()
-        self.__singleton = self
+        if ReferenceEditorUI._singleton is not None:
+            print("Groot")
+            ReferenceEditorUI._singleton.close()
+        ReferenceEditorUI._singleton = self
     
     def _selected_item(self) -> FBXItem:
         selected_index = self.list_view.currentIndex()

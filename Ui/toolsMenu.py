@@ -36,7 +36,7 @@ def create():
         new_menu.InsertFirst("Show Log", 1)
         new_menu.OnMenuActivate.Add(_show_logger_cb)
 
-        new_menu.InsertFirst("Reference Editor", 2)
+        new_menu.InsertLast("Reference Editor", 2)
         new_menu.OnMenuActivate.Add(_open_reference_ui)
     except Exception as e:
         mb_logger.error(e)

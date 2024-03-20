@@ -31,7 +31,6 @@ class MobuLoggerView(QMainWindow):
 
         self._populate()
         self._redirect_std()
-        self.show()
     
     @classmethod
     def instance(cls):

@@ -5,30 +5,45 @@ from PySide2.QtWidgets import QMainWindow, QAction, QFileDialog, QListView, QToo
 from PySide2.QtGui import QStandardItemModel, QStandardItem
 from PySide2.QtCore import QSize
 
-from pyfbsdk import FBFindObjectByFullName, FBSystem
+from pyfbsdk import FBFileReference
 
 from ..Ui import qtUtils
+from ..Core import reference
 
 
 class FBXItem(QStandardItem):
 
-    def __init__(self, reference):
+    def __init__(self, reference: FBFileReference):
         super().__init__(qtUtils.fbx_icon, reference.ReferenceFilePath)
         self.reference = reference
 
 
 class ReferenceEditorUI(QMainWindow):
 
+    _singleton = None
+
+    def __new__(cls, *args, **kwargs):
+        if not cls._singleton:
+            return super().__new__(cls, *args, **kwargs)
+        return cls._singleton
+
     def __init__(self, parent: Optional[QWidget] = None):
         super().__init__(qtUtils.get_main_window() if not parent else parent)
-
         self.setWindowTitle("Reference Editor")
+        self._add_toolbar()
+        self._add_view()
+        self._update_content()
 
-        self.__add_toolbar()
-        self.__add_view()
-        self.__update_content()
+    def _check_singleton(self):
+        if self.__singleton is not None:
+            self.__singleton.close()
+        self.__singleton = self
+    
+    def _selected_item(self) -> FBXItem:
+        selected_index = self.list_view.currentIndex()
+        return self.model.itemFromIndex(selected_index) if selected_index.isValid() else None
 
-    def __add_toolbar(self):
+    def _add_toolbar(self):
 
         toolbar = QToolBar()
 
@@ -46,7 +61,7 @@ class ReferenceEditorUI(QMainWindow):
     
         self.addToolBar(toolbar)
 
-    def __add_view(self):
+    def _add_view(self):
         self.list_view = QListView()
         self.list_view.setIconSize(QSize(30, 30))
 
@@ -57,26 +72,28 @@ class ReferenceEditorUI(QMainWindow):
 
     def _import_reference(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Import FBX file", ".", "FBX Files (*.fbx)")
-        if file_path:
-            print(file_path)
-            _, file_name = os.path.split(file_path)
-            reference_name = file_name.split(".")[0]
-            FBSystem().Scene.NamespaceImport(f"_{reference_name}_", file_path, True )
-            reference = FBFindObjectByFullName(f"FileReference::_{reference_name}_")
-            if not reference:
-                raise RuntimeError("Error on import reference !")
-            self.__add_reference_itel(reference)
+        if not file_path:
+            return
+
+        ref = reference.load(file_path)
+        self._add_item(ref)
 
     def _reload_reference(self):
-        pass
+        seleted_item = self._selected_item()
+        if seleted_item:
+            seleted_item.reference = reference.reload(seleted_item.reference)
 
     def remove_reference(self):
-        pass
+        seleted_item = self._selected_item()
+        if seleted_item:
+            reference.remove(seleted_item.reference)
+        self.model.removeRow(seleted_item.index().row())
 
-    def __update_content(self):
+    def _update_content(self):
         self.model.clear()
-        pass
+        for ref in reference.get_all():
+            self._add_item(ref)
 
-    def __add_reference_itel(self, reference):
-        item = FBXItem(reference)
+    def _add_item(self, ref: FBFileReference):
+        item = FBXItem(ref)
         self.model.appendRow(item)

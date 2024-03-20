@@ -31,3 +31,4 @@ class STDOutputWriter:
     def flush(self):
         with open(self._file_path, "a") as file_handler:
             file_handler.flush()
+        self._old_std.flush()

@@ -1,9 +1,20 @@
+import os
 from typing import Optional
 
 from PySide2 import QtWidgets
+from PySide2.QtGui import QIcon
 
 
 main_window = None
+
+
+__module_path, _ = os.path.split(__file__)
+icon_path = os.path.join(__module_path, "icons")
+
+import_icon = QIcon(os.path.join(icon_path, "import.svg"))
+reload_icon = QIcon(os.path.join(icon_path, "reload.svg"))
+remove_icon = QIcon(os.path.join(icon_path, "remove.svg"))
+fbx_icon = QIcon(os.path.join(icon_path, "fbx.svg"))
 
 
 def get_main_window() -> Optional[QtWidgets.QWidget]:

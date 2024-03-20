@@ -14,7 +14,7 @@ except Exception as e:
     mb_logger.debug(traceback.format_exc())
 
 
-def show_logger_cb(control, event):
+def _show_logger_cb(control, event):
     try:
         logger_instance = MobuLoggerView.instance()
         if logger_instance:
@@ -24,17 +24,30 @@ def show_logger_cb(control, event):
         mb_logger.debug(traceback.format_exc())
 
 
-try:
-    menu_name = "Python Log"
-    menu_mgr = FBMenuManager()
+def _open_reference_ui(control, event):
+    try:
+        from .Ui.referenceEditorUI import ReferenceEditorUI
+        ReferenceEditorUI().show()
+    except Exception as e:
+        mb_logger.error(e)
+        mb_logger.debug(traceback.format_exc())
 
+
+try:
+    menu_name = "MB Tools"
+
+    menu_mgr = FBMenuManager()
     menu_mgr.InsertLast(None, menu_name)
-    pythonLogMenu = menu_mgr.GetMenu(menu_name)
-    pythonLogMenu.InsertFirst("Show Console", 1)
-    pythonLogMenu.OnMenuActivate.Add(show_logger_cb)
+    new_menu = menu_mgr.GetMenu(menu_name)
+
+    new_menu.InsertFirst("Show Log", 1)
+    new_menu.OnMenuActivate.Add(_show_logger_cb)
+
+    new_menu.InsertLast("Reference Editor", 2)
+    new_menu.OnMenuActivate.Add(_open_reference_ui)
 except Exception as e:
     mb_logger.error(e)
     mb_logger.debug(traceback.format_exc()) 
 
+
 mb_logger.info("Start up message !")
-raise RuntimeError("Hodor !")

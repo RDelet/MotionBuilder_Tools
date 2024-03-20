@@ -12,8 +12,8 @@ except Exception as e:
 
 
 try:
-    from .Ui import toolsMenu
-    toolsMenu.create()
+    from .Ui.toolsMenu import ToolsMenu
+    ToolsMenu().create()
 except Exception as e:
     mb_logger.error(e)
     mb_logger.debug(traceback.format_exc())
